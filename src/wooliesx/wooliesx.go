@@ -10,10 +10,11 @@ import (
 type SDK struct {
 	client *http.Client
 	url    string
+	token  string
 }
 
 // New creates and returns a connection to the WookiesX API
-func New(baseURL string) *SDK {
+func New(baseURL, token string) *SDK {
 	return &SDK{
 		client: &http.Client{
 			Transport: &http.Transport{
@@ -29,6 +30,7 @@ func New(baseURL string) *SDK {
 				IdleConnTimeout:       time.Second * 10,
 			},
 		},
-		url: baseURL,
+		url:   baseURL,
+		token: token,
 	}
 }

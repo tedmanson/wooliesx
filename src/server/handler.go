@@ -20,7 +20,6 @@ func getUser(c echo.Context) error {
 }
 
 func getProducts(c echo.Context) error {
-	var token = c.QueryParam("token")
 	var sortOption = c.QueryParam("sortOption")
 
 	wx := c.Get("wooliesx").(*wooliesx.SDK)
@@ -28,14 +27,14 @@ func getProducts(c echo.Context) error {
 		echo.NewHTTPError(http.StatusFailedDependency, "Product listing currently unavailable")
 	}
 
-	products, err := wx.GetProducts(token)
+	products, err := wx.GetProducts()
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Product listing currently unavailable")
 	}
 
 	if sortOption != "" {
-		products.Sort(sortOption)
+		products = wx.SortProducts(products, sortOption)
 	}
 
-	return c.JSON(http.StatusOK, products.Products)
+	return c.JSON(http.StatusOK, products)
 }

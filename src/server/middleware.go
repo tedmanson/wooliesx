@@ -16,11 +16,10 @@ func userTokenAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func wooliesSDKMiddleware(wooliesx *wooliesx.SDK) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			c.Set("wooliesx", wooliesx)
-			return next(c)
-		}
+func wooliesSDKMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var wx = wooliesx.New("http://dev-wooliesx-recruitment.azurewebsites.net/api/", c.QueryParam("token"))
+		c.Set("wooliesx", wx)
+		return next(c)
 	}
 }
