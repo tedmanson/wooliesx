@@ -24,7 +24,7 @@ func getProducts(c echo.Context) error {
 
 	wx := c.Get("wooliesx").(*wooliesx.SDK)
 	if wx == nil {
-		echo.NewHTTPError(http.StatusFailedDependency, "Product listing currently unavailable")
+		echo.NewHTTPError(http.StatusFailedDependency, "Unable to connect to the WooliesX SDK")
 	}
 
 	products, err := wx.GetProducts()
@@ -37,4 +37,18 @@ func getProducts(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, products)
+}
+
+func getTrolley(c echo.Context) error {
+	wx := c.Get("wooliesx").(*wooliesx.SDK)
+	if wx == nil {
+		echo.NewHTTPError(http.StatusFailedDependency, "Unable to connect to the WooliesX SDK")
+	}
+
+	total, err := wx.GetTrolleyTotal()
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Trolley total currently unavailable")
+	}
+
+	return c.JSON(http.StatusOK, total)
 }

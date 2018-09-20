@@ -1,9 +1,11 @@
 package wooliesx
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/gommon/log"
@@ -11,15 +13,15 @@ import (
 
 // Product is a single prodict listing
 type Product struct {
-	Name     string  `json:"name,omitempty"`
-	Price    float64 `json:"price,omitempty"`
-	Quantity float32 `json:"quantity,omitempty"`
+	Name     string  `json:"name"`
+	Price    float32 `json:"price"`
+	Quantity float32 `json:"quantity"`
 }
 
 // Sale is a reference for each sale
 type Sale struct {
-	CustomerID int       `json:"customerId,omitempty"`
-	Products   []Product `json:"products,omitempty"`
+	CustomerID int       `json:"customerId"`
+	Products   []Product `json:"products"`
 }
 
 // GetProducts returns a list of products provided by a call to a WooliesX API
@@ -133,6 +135,66 @@ func (s SDK) SortProducts(products []Product, sortOption string) []Product {
 	}
 
 	return products
+}
+
+// GetTrolleyTotal returns a int32 representation of the total cost of the trolley
+func (s SDK) GetTrolleyTotal() (float32, error) {
+	products, err := s.GetProducts()
+	if err != nil {
+		return 0, err
+	}
+
+	var total float64
+	for _, product := range products {
+		var p []prod
+		var q []quant
+
+		p = append(p, prod{
+			Name:  product.Name,
+			Price: product.Price,
+		})
+		q = append(q, quant{
+			Name:     product.Name,
+			Quantity: product.Quantity,
+		})
+
+		var trolley = struct {
+			Products   []prod    `json:"products,omitempty"`
+			Specials   []special `json:"specials,omitempty"`
+			Quantities []quant   `json:"quantities,omitempty"`
+		}{
+			Products:   p,
+			Quantities: q,
+			Specials:   getSpecials(product),
+		}
+
+		b, err := json.Marshal(trolley)
+		if err != nil {
+			return 0, err
+		}
+
+		resp, err := s.client.Post(s.url+"resource/trolleyCalculator?token="+s.token, "application/json", bytes.NewReader(b))
+		if err != nil {
+			return 0, err
+		}
+
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return 0, err
+		}
+
+		totalStr := string(body)
+		t, err := strconv.ParseFloat(totalStr, 32)
+		if err != nil {
+			return 0, err
+		}
+
+		total += t
+	}
+
+	return float32(total), nil
 }
 
 func findTopProducts(sales []Sale) []Pair {
