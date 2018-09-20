@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
-	"github.com/tedmanson/wool/src/wooliesx"
+	"github.com/tedmanson/wooliesx/src/wooliesx"
 )
 
 func userTokenAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {

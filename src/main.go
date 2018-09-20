@@ -1,6 +1,6 @@
 package main
 
-import "github.com/tedmanson/wool/src/server"
+import "github.com/tedmanson/wooliesx/src/server"
 
 func main() {
 	server.Run()
