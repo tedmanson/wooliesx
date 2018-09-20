@@ -11,7 +11,7 @@ func Run() {
 	e.Use(middleware.Logger())
 	e.Pre(middleware.RemoveTrailingSlash())
 
-	e.GET("/user", getUser)
+	e.GET("/:user", getUser)
 
 	e.Use(wooliesSDKMiddleware)
 
